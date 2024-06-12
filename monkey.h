@@ -172,3 +172,4 @@ static PatchGuard patch(FT target, FR replacement) {
 #endif // __cplusplus
 
 #undef N
+#undef u8

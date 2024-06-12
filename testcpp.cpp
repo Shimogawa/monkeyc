@@ -26,7 +26,7 @@ int breakA(A *a) {
 int main() {
     std::cout << plus1(1) << std::endl;
     {
-        auto g = monkeyc::patch(&plus1, &plus2);
+        auto g = monkeyc::patch(plus1, plus2);
         std::cout << plus1(1) << std::endl;
     }
     std::cout << plus1(1) << std::endl;
