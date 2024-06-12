@@ -8,3 +8,13 @@ set(HEADERS monkey.h)
 set(SOURCES test.c)
 
 add_executable(monkeyc_test ${SOURCES} ${HEADERS})
+
+project(monkeycpp_test CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+
+set(HEADERS monkey.h)
+
+set(SOURCES testcpp.cpp)
+
+add_executable(monkeycpp_test ${SOURCES} ${HEADERS})
