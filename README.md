@@ -40,14 +40,10 @@ __attribute__((noinline)) int plus1(int i) {
     return i + 1;
 }
 
-__attribute__((noinline)) int plus2(int i) {
-    return i + 2;
-}
-
 int main(void) {
     std::cout << plus1(1) << std::endl;
     {
-        auto g = monkeyc::patch(plus1, plus2);
+        auto g = monkeyc::patch(plus1, [](int i) { return i + 2; });
         std::cout << plus1(1) << std::endl;
     }
     std::cout << plus1(1) << std::endl;
