@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <type_traits>
 
 #else // __cplusplus
 #define N(n) monkeyc_##n
@@ -146,8 +147,15 @@ union UnsafeCaster {
     }
 };
 
+template<typename F>
+inline constexpr bool is_valid_function_type = std::is_member_function_pointer_v<F>;
+
+template<typename F>
+inline constexpr bool is_valid_function_type<F *> = std::is_function_v<F>;
+
 template<typename FT, typename FR>
 static PatchGuard patch(FT target, FR replacement) {
+    static_assert(is_valid_function_type<FT> && is_valid_function_type<FR>, "must be function type");
     PatchGuard g{};
     UnsafeCaster<FT> uT(target);
     UnsafeCaster<FR> uR(replacement);

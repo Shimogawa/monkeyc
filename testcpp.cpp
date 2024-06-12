@@ -40,4 +40,13 @@ int main() {
         std::cout << a.a() << std::endl;
     }
     std::cout << a.a() << std::endl;
+
+    std::cout << "-----" << std::endl;
+
+    std::cout << plus1(1) << std::endl;
+    {
+        auto g = monkeyc::patch(&plus1, +[](int i) { return i + 114514; });
+        std::cout << plus1(1) << std::endl;
+    }
+    std::cout << plus1(1) << std::endl;
 }
