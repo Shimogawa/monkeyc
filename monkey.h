@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <functional>
 #include <type_traits>
 
 #else // __cplusplus
@@ -124,7 +125,7 @@ static inline void N(assemble_jmp_instr)(void *dst, u8 instr_buf[MONKEYC_JUMP_SI
         (p->ptr, p->instr, MONKEYC_JUMP_SIZE);
     }
 
-#else  // __cplusplus
+#else // __cplusplus
 
 class PatchGuard {
 public:
@@ -138,6 +139,12 @@ public:
 };
 
 template<typename F>
+inline constexpr bool is_valid_function_type = std::is_class_v<F> || std::is_member_function_pointer_v<F>;
+
+template<typename F>
+inline constexpr bool is_valid_function_type<F *> = std::is_function_v<F>;
+
+template<typename F, class = void>
 union UnsafeCaster {
     F f;
     void *p{};
@@ -147,11 +154,19 @@ union UnsafeCaster {
     }
 };
 
+// special handling for lambdas
 template<typename F>
-inline constexpr bool is_valid_function_type = std::is_member_function_pointer_v<F>;
+union UnsafeCaster<F, typename std::enable_if_t<std::is_class_v<F>>> {
+    void *f;
+    void *p{};
 
-template<typename F>
-inline constexpr bool is_valid_function_type<F *> = std::is_function_v<F>;
+    inline explicit UnsafeCaster(F f) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-cast"
+        this->f = static_cast<void *>(+f);
+#pragma clang diagnostic pop
+    }
+};
 
 template<typename FT, typename FR>
 static PatchGuard patch(FT target, FR replacement) {

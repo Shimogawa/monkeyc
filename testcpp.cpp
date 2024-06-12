@@ -45,7 +45,7 @@ int main() {
 
     std::cout << plus1(1) << std::endl;
     {
-        auto g = monkeyc::patch(&plus1, +[](int i) { return i + 114514; });
+        auto g = monkeyc::patch(&plus1, [](int i) { return i + 114514; });
         std::cout << plus1(1) << std::endl;
     }
     std::cout << plus1(1) << std::endl;
