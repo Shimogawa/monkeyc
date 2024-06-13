@@ -1,5 +1,6 @@
 #include "monkey.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifndef NDEBUG
 #define ASSERT(condition, message)                                           \

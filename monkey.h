@@ -17,6 +17,11 @@
 
 #ifdef _WIN32
 #include <Windows.h>
+#elif __unix__
+#include <sys/mman.h>
+#include <unistd.h>
+#else
+#error "Unsupported platform"
 #endif
 
 #ifdef __cplusplus
@@ -39,15 +44,18 @@ namespace monkeyc {
         assert(success);
     }
 
-#elif __unix__
-
-#error "WIP"
+#else
 
 static void N(copy_to_addr_unsafe)(void *dst, void *src, size_t len) {
+    size_t page_size = sysconf(_SC_PAGESIZE);
+    void *page_start = (void *) ((size_t) dst & ~(page_size - 1));
+    int res = mprotect(page_start, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
+    assert(res == 0);
+    memcpy(dst, src, len);
+    res = mprotect(page_start, page_size, PROT_READ | PROT_EXEC);
+    assert(res == 0);
 }
 
-#else
-#error "Unsupported platform"
 #endif
 
 #ifdef __x86_64__
@@ -163,7 +171,7 @@ union UnsafeCaster<F, typename std::enable_if_t<std::is_class_v<F>>> {
     inline explicit UnsafeCaster(F f) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-cast"
-        this->f = static_cast<void *>(+f);
+        this->f = (void *) (+f);
 #pragma clang diagnostic pop
     }
 };
