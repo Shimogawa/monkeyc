@@ -1,4 +1,6 @@
-# Monkey patching in C
+# Monkey patching in C and C++
+
+![example workflow](https://github.com/Shimogawa/monkeyc/actions/workflows/cmake.yml/badge.svg)
 
 A single-header library that provides monkey patching in C and C++.
 
