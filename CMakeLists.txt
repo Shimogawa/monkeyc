@@ -18,3 +18,8 @@ set(HEADERS monkey.h)
 set(SOURCES testcpp.cpp)
 
 add_executable(monkeycpp_test ${SOURCES} ${HEADERS})
+
+enable_testing()
+
+add_test(NAME monkeyc_test COMMAND monkeyc_test)
+add_test(NAME monkeycpp_test COMMAND monkeycpp_test)
