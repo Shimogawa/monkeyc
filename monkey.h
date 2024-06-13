@@ -1,27 +1,36 @@
 #pragma once
 
 #ifdef __cplusplus
-#define N(n) n
+    #define N(n) n
 
-#include <cassert>
-#include <cstring>
-#include <functional>
-#include <type_traits>
+    #include <cassert>
+    #include <cstring>
+    #include <functional>
+    #include <type_traits>
 
 #else // __cplusplus
-#define N(n) monkeyc_##n
+    #define N(n) monkeyc_##n
 
-#include <assert.h>
-#include <string.h>
+    #include <assert.h>
+    #include <string.h>
 #endif // __cplusplus
 
 #ifdef _WIN32
-#include <Windows.h>
+    #include <Windows.h>
 #elif __unix__
-#include <sys/mman.h>
-#include <unistd.h>
+    #include <sys/mman.h>
+    #include <unistd.h>
 #else
-#error "Unsupported platform"
+    #error "Unsupported platform"
+#endif
+
+
+#if defined(__x86_64__) || defined(_M_X64)
+    #define MONKEYC_ENV64BIT
+#elif defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
+    #define MONKEYC_ENV32BIT
+#else
+    #error "Unsupported architecture"
 #endif
 
 #ifdef __cplusplus
@@ -58,13 +67,13 @@ static void N(copy_to_addr_unsafe)(void *dst, void *src, size_t len) {
 
 #endif
 
-#ifdef __x86_64__
+#ifdef MONKEYC_ENV64BIT
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
     const size_t MONKEYC_JUMP_SIZE = 12;
-#else
-#define MONKEYC_JUMP_SIZE 12
-#endif
+    #else
+        #define MONKEYC_JUMP_SIZE 12
+    #endif
 
     static inline void N(assemble_jmp_instr)(void *dst, u8 instr_buf[MONKEYC_JUMP_SIZE]) {
         size_t addr = (size_t) dst;
@@ -84,13 +93,13 @@ static void N(copy_to_addr_unsafe)(void *dst, void *src, size_t len) {
         instr_buf[11] = 0xE2;
     }
 
-#elif __i386__
+#elif MONKEYC_ENV32BIT
 
-#ifdef __cplusplus
+    #ifdef __cplusplus
 const size_t MONKEYC_JUMP_SIZE = 7;
-#else
-#define MONKEYC_JUMP_SIZE 7
-#endif
+    #else
+        #define MONKEYC_JUMP_SIZE 7
+    #endif
 
 static inline void N(assemble_jmp_instr)(void *dst, u8 instr_buf[MONKEYC_JUMP_SIZE]) {
     size_t addr = (size_t) dst;
@@ -105,8 +114,6 @@ static inline void N(assemble_jmp_instr)(void *dst, u8 instr_buf[MONKEYC_JUMP_SI
     instr_buf[6] = 0xE2;
 }
 
-#else
-#error "Unsupported architecture"
 #endif
 
 #ifndef __cplusplus
@@ -169,10 +176,10 @@ union UnsafeCaster<F, typename std::enable_if_t<std::is_class_v<F>>> {
     void *p{};
 
     inline explicit UnsafeCaster(F f) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-cast"
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wmicrosoft-cast"
         this->f = (void *) (+f);
-#pragma clang diagnostic pop
+    #pragma clang diagnostic pop
     }
 };
 

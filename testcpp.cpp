@@ -2,23 +2,29 @@
 #include <iostream>
 
 #ifndef NDEBUG
-#define ASSERT(condition, message)                                             \
-    do {                                                                       \
-        if (!(condition)) {                                                    \
-            std::cerr << "Assertion `" #condition "` failed in " << __FILE__   \
-                      << " line " << __LINE__ << ": " << message << std::endl; \
-            std::exit(1);                                                      \
-        }                                                                      \
-    } while (false)
+    #define ASSERT(condition, message)                                             \
+        do {                                                                       \
+            if (!(condition)) {                                                    \
+                std::cerr << "Assertion `" #condition "` failed in " << __FILE__   \
+                          << " line " << __LINE__ << ": " << message << std::endl; \
+                std::exit(1);                                                      \
+            }                                                                      \
+        } while (false)
 #else
-#error "This test file must be run in debug mode"
+    #error "This test file must be run in debug mode"
 #endif
 
-__attribute__((noinline)) int plus1(int i) {
+#ifdef _MSC_VER
+    #define NOINLINE __declspec(noinline)
+#else
+    #define NOINLINE __attribute__((noinline))
+#endif
+
+NOINLINE int plus1(int i) {
     return i + 1;
 }
 
-__attribute__((noinline)) int plus2(int i) {
+NOINLINE int plus2(int i) {
     return i + 2;
 }
 
