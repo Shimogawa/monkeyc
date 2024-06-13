@@ -140,7 +140,7 @@ static inline void N(assemble_jmp_instr)(void *dst, u8 instr_buf[MONKEYC_JUMP_SI
         (p->ptr, p->instr, MONKEYC_JUMP_SIZE);
     }
 
-#else // __cplusplus
+#else  // __cplusplus
 
 class PatchGuard {
 public:
@@ -154,10 +154,13 @@ public:
 };
 
 template<typename F>
-inline constexpr bool is_valid_function_type = std::is_class_v<F> || std::is_member_function_pointer_v<F>;
+inline constexpr bool is_valid_function_type = std::is_member_function_pointer_v<F>;
 
 template<typename F>
 inline constexpr bool is_valid_function_type<F *> = std::is_function_v<F>;
+
+template<typename F>
+inline constexpr bool is_valid_patch_type = std::is_class_v<F> || is_valid_function_type<F>;
 
 template<typename F, class = void>
 union UnsafeCaster {
@@ -176,16 +179,14 @@ union UnsafeCaster<F, typename std::enable_if_t<std::is_class_v<F>>> {
     void *p{};
 
     inline explicit UnsafeCaster(F f) {
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wmicrosoft-cast"
+        static_assert(is_valid_function_type<decltype(+f)>, "+f must be a function if passing in an object");
         this->f = (void *) (+f);
-    #pragma clang diagnostic pop
     }
 };
 
 template<typename FT, typename FR>
 static PatchGuard patch(FT target, FR replacement) {
-    static_assert(is_valid_function_type<FT> && is_valid_function_type<FR>, "must be function type");
+    static_assert(is_valid_patch_type<FT> && is_valid_patch_type<FR>, "must be function type");
     PatchGuard g{};
     UnsafeCaster<FT> uT(target);
     UnsafeCaster<FR> uR(replacement);
